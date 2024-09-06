@@ -2,7 +2,7 @@ const recintos = [
     {numero: 1, bioma: ['savana'], tamanhoTot: 10, animaisExistentes: [{especie: 'MACACO', quantidade: 3}]},
     {numero: 2, bioma: ['floresta'], tamanhoTot: 5, animaisExistentes: []},
     {numero: 3, bioma: ['savana', 'rio'], tamanhoTot: 7, animaisExistentes: [{especie: 'GAZELA', quantidade: 1}]},
-    {numero: 4, bioma: ['rio'], tamanhoTot: 8, animaisExistentes: [{}]},
+    {numero: 4, bioma: ['rio'], tamanhoTot: 8, animaisExistentes: []},
     {numero: 5, bioma: ['savana'], tamanhoTot: 9, animaisExistentes: [{especie: 'LEAO', quantidade: 1}]}
 ];
 
@@ -18,7 +18,7 @@ const animais = [
 class RecintosZoo {
     analisaRecintos(animal, quantidade) {
         let recintosViaveis = [];
-        if(quantidade == 0){
+        if(quantidade <= 0){
             return {erro: 'Quantidade inválida', recintosViaveis: false};
         }
         
