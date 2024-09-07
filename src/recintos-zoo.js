@@ -19,54 +19,75 @@ class RecintosZoo {
     analisaRecintos(animal, quantidade) {
         let recintosViaveis = [];
         if(!Number.isInteger(quantidade) || quantidade <= 0){
-            return {erro: 'Quantidade inválida', recintosViaveis: false};
+            return {
+                erro: 'Quantidade inválida', recintosViaveis: false
+            };
         }
         
-        let animalEncontrado = animais.find(a => a.especie === animal);
+        const animalEncontrado = animais.find(a => a.especie === animal);
         if(!animalEncontrado){
-            return {erro: 'Animal inválido', recintosViaveis: false};
+            return {
+                erro: 'Animal inválido', recintosViaveis: false
+            };
         }
 
         let tamanhoDosAnimais = animalEncontrado.tamanho * quantidade;
-        let possiveisRecintos = [];
-        possiveisRecintos = recintos.filter(recinto =>
+        let possiveisRecintos = recintos.filter(recinto =>
             recinto.bioma.some(biomaRecinto =>
                 animalEncontrado.bioma.includes(biomaRecinto)
             )
         );
 
-
         // verificando se o recinto possui animais carnivoros, se possuir e for de uma espécie diferente, o recinto não é mais considerado como possivel.
-        possiveisRecintos.forEach((recinto, i) => {
-            if(recinto.animaisExistentes != null){
-                let retirou = false;
-                recinto.animaisExistentes.forEach(a => {
-                    let animalNoRecinto = animais.find(animal => animal.especie === a.especie);
-                    if((animalEncontrado.alimentacao === 'CARNIVORO' || animalNoRecinto.alimentacao === 'CARNIVORO') && animalNoRecinto.especie != animalEncontrado.especie){
-                        if(!retirou){
-                            possiveisRecintos.splice(i, 1);
-                            retirou = true;
-                        }
-                    }
-                })
+        let recintosFiltrados = possiveisRecintos.filter(recinto => {
+            if(recinto.animaisExistentes.length === 0){
+                return true;
             }
+            let algumAnimalCarnivoro = recinto.animaisExistentes.some(animalExistenteNoRecinto => {
+                let animalNoRecinto = animais.find(animal => animal.especie === animalExistenteNoRecinto.especie);
+                return (animalNoRecinto.alimentacao === 'CARNIVORO' || animalEncontrado.alimentacao === 'CARNIVORO') && (animalNoRecinto.especie !== animalEncontrado.especie);
+            });
+            return !algumAnimalCarnivoro;
+        });
+        possiveisRecintos = [...recintosFiltrados];
+        
+        // verificando tamanho disponivel em cada um dos recintos que sao uma opcao até o momento
+        let tamanhoDisponivelNosRecintos = possiveisRecintos.map(recinto => {
+            let tamanhoOcupado = recinto.animaisExistentes.reduce((x, animalNoRecinto) => {
+                let animalNaTabela = animais.find(a => a.especie === animalNoRecinto.especie);
+                if(!animalNaTabela){
+                    return 0;
+                }
+                // verificando se os animais são de especies diferentes, caso for, estaremos considerando 1 espaço extra ocupado
+                if(animalNaTabela.especie !== animalEncontrado.especie){
+                    return (animalNaTabela.tamanho * animalNoRecinto.quantidade) + 1;
+                } else {
+                    return (animalNaTabela.tamanho * animalNoRecinto.quantidade);
+                }
+            }, 0);
+            return {numeroRecinto: recinto.numero, tamanhoDisponivel: recinto.tamanhoTotal - tamanhoOcupado};
         });
 
-        /*
-        let tamanhoDisponivelNosRecintos = [];
-        tamanhoDisponivelNosRecintos = possiveisRecintos.map(recinto => {
-            let tamanhoOcupado = recinto.animaisExistentes.reduce((total, animal) => {
-                return (animal.quantidade * animalEncontrado.tamanho);
-            }, 0);
+        // verificando se tamanho disponivel em cada recinto é menor ou maior que tamanho dos animais que serao inseridos
+        recintosFiltrados = possiveisRecintos.filter((recinto, i) => {
+            if(tamanhoDosAnimais > tamanhoDisponivelNosRecintos[i].tamanhoDisponivel){
+                return false;
+            } else {
+                return true;
+            }
+        });
+        possiveisRecintos = [...recintosFiltrados];
+        if(possiveisRecintos.length === 0){
+            return {
+                erro: "Não há recinto viável", recintosViaveis: false
+            }
+        }
 
-            let tamanhoDisponivel = recinto.tamanhoTotal - tamanhoOcupado;
-            return tamanhoDisponivel;
-        })*/
         console.log(possiveisRecintos);
     }
 }
 
-const resultado = new RecintosZoo().analisaRecintos('MACACO', 1);
+const resultado = new RecintosZoo().analisaRecintos('MACACO', 5);
 console.log(resultado);
 
 export { RecintosZoo as RecintosZoo };
