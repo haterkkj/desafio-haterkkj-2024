@@ -18,12 +18,15 @@ const animais = [
 class RecintosZoo {
     analisaRecintos(animal, quantidade) {
         let recintosViaveis = [];
+        
+        // tratando quantidade invalida
         if(!Number.isInteger(quantidade) || quantidade <= 0){
             return {
                 erro: 'Quantidade inválida', recintosViaveis: false
             };
         }
         
+        // tratando animal invalido
         const animalEncontrado = animais.find(a => a.especie === animal);
         if(!animalEncontrado){
             return {
@@ -31,7 +34,10 @@ class RecintosZoo {
             };
         }
 
+        // calculando tamanho total do lote de animais que estamos procurando um recinto
         let tamanhoDosAnimais = animalEncontrado.tamanho * quantidade;
+
+        // filtrando possiveis recintos baseado nos biomas em que o lote de novos animais se sente confortavel 
         let possiveisRecintos = recintos.filter(recinto =>
             recinto.bioma.some(biomaRecinto =>
                 animalEncontrado.bioma.includes(biomaRecinto)
@@ -77,6 +83,8 @@ class RecintosZoo {
             }
         });
         possiveisRecintos = [...recintosFiltrados];
+        
+        // caso nesta parte da filtragem já não houver recintos viaveis para tal animal, já retornamos o erro.
         if(possiveisRecintos.length === 0){
             return {
                 erro: "Não há recinto viável", recintosViaveis: false
